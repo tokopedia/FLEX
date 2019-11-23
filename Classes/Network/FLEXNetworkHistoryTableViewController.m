@@ -328,6 +328,10 @@
 
 - (void)updateSearchResults:(NSString *)searchString
 {
+    if (searchString.length == 0)
+    {
+        return NO;
+    }
     [self onBackgroundQueue:^NSArray *{
         return [self.networkTransactions filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(FLEXNetworkTransaction *transaction, NSDictionary<NSString *, id> *bindings) {
             return [[transaction.request.URL absoluteString] rangeOfString:searchString options:NSCaseInsensitiveSearch].length > 0;
