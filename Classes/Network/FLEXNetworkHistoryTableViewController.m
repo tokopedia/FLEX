@@ -330,7 +330,7 @@
 {
     if (searchString.length == 0)
     {
-        return NO;
+        return;
     }
     [self onBackgroundQueue:^NSArray *{
         return [self.networkTransactions filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(FLEXNetworkTransaction *transaction, NSDictionary<NSString *, id> *bindings) {
