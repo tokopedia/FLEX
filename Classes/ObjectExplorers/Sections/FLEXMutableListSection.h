@@ -36,23 +36,22 @@ typedef void (^FLEXMutableListCellForElement)(__kindof UITableViewCell *cell, id
 
 /// By default, rows are not selectable. If you want rows
 /// to be selectable, provide a selection handler here.
-@property (nonatomic) void (^selectionHandler)(__kindof UIViewController * host, id element);
+@property (nonatomic, copy) void (^selectionHandler)(__kindof UIViewController *host, id element);
 
 /// The objects representing all possible rows in the section.
-@property (nonatomic) NSArray<ObjectType> *list;
+@property (nonatomic, strong) NSArray<ObjectType> *list;
 /// The objects representing the currently unfiltered rows in the section.
-@property (nonatomic, readonly) NSArray<ObjectType> *filteredList;
+@property (nonatomic, strong, readonly) NSArray<ObjectType> *filteredList;
 
 /// A readwrite version of the same property in \c FLEXTableViewSection.h
 ///
 /// This property expects one entry. An exception is thrown if more than one
 /// entry is supplied. If you need more than one reuse identifier within a single
 /// section, your view probably has more complexity than this class can handle.
-@property (nonatomic, readwrite) NSDictionary<NSString *, Class> *cellRegistrationMapping;
+@property (nonatomic, strong, readwrite) NSDictionary<NSString *, Class> *cellRegistrationMapping;
 
 /// Call this method to mutate the full, unfiltered list.
 /// This ensures that \c filteredList is updated after any mutations.
 - (void)mutate:(void(^)(NSMutableArray *list))block;
 
 @end
-
