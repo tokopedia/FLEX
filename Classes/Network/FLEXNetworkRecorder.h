@@ -3,7 +3,7 @@
 //  Flipboard
 //
 //  Created by Ryan Olson on 2/4/15.
-//  Copyright (c) 2020 Flipboard. All rights reserved.
+//  Copyright (c) 2020 FLEX Team. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -28,13 +28,13 @@ extern NSString *const kFLEXNetworkRecorderTransactionsClearedNotification;
 /// with an "image", "video", or "audio" prefix.
 @property (nonatomic) BOOL shouldCacheMediaResponses;
 
-@property (nonatomic) NSMutableArray<NSString *> *hostBlacklist;
+@property (nonatomic) NSMutableArray<NSString *> *hostDenylist;
 
-/// Call this after adding to or setting the \c hostBlacklist to remove blacklisted transactions
-- (void)clearBlacklistedTransactions;
+/// Call this after adding to or setting the \c hostDenylist to remove excluded transactions
+- (void)clearExcludedTransactions;
 
-/// Call this to save the blacklist to the disk to be loaded next time
-- (void)synchronizeBlacklist;
+/// Call this to save the denylist to the disk to be loaded next time
+- (void)synchronizeDenylist;
 
 
 // Accessing recorded network activity

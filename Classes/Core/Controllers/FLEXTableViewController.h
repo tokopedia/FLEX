@@ -3,7 +3,7 @@
 //  FLEX
 //
 //  Created by Tanner on 7/5/19.
-//  Copyright © 2019 Flipboard. All rights reserved.
+//  Copyright © 2020 FLEX Team. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
@@ -67,6 +67,10 @@ extern CGFloat const kFLEXDebounceForExpensiveIO;
 /// Setting this to YES will make the search bar appear whenever the view appears.
 /// Otherwise, iOS will only show the search bar when you scroll up.
 @property (nonatomic) BOOL showSearchBarInitially;
+/// Defaults to NO.
+///
+/// Setting this to YES will make the search bar activate whenever the view appears.
+@property (nonatomic) BOOL activatesSearchBarAutomatically;
 
 /// nil unless showsSearchBar is set to YES.
 ///

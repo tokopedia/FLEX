@@ -3,7 +3,7 @@
 //  Flipboard
 //
 //  Created by Ryan Olson on 4/4/14.
-//  Copyright (c) 2020 Flipboard. All rights reserved.
+//  Copyright (c) 2020 FLEX Team. All rights reserved.
 //
 
 #import "FLEXManager.h"
@@ -89,6 +89,18 @@
     } else {
         [self hideExplorer];
     }
+}
+
+- (void)dismissAnyPresentedTools:(void (^)(void))completion {
+    if (self.explorerViewController.presentedViewController) {
+        [self.explorerViewController dismissViewControllerAnimated:YES completion:completion];
+    } else if (completion) {
+        completion();
+    }
+}
+
+- (void)presentTool:(UINavigationController * _Nonnull (^)(void))future completion:(void (^)(void))completion {
+    [self.explorerViewController toggleToolWithViewControllerProvider:future completion:completion];
 }
 
 - (void)showExplorerFromScene:(UIWindowScene *)scene {

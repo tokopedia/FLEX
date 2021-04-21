@@ -8,6 +8,7 @@
 
 #import "CommitListViewController.h"
 #import "FLEXample-Swift.h"
+#import "Person.h"
 #import <FLEX.h>
 
 @interface CommitListViewController ()
@@ -30,7 +31,7 @@
     self.title = @"FLEX Commit History";
     self.showsSearchBar = YES;
     self.navigationItem.rightBarButtonItem = [UIBarButtonItem
-        itemWithTitle:@"FLEX" target:FLEXManager.sharedManager action:@selector(toggleExplorer)
+        flex_itemWithTitle:@"FLEX" target:FLEXManager.sharedManager action:@selector(toggleExplorer)
     ];
     
     // Load and process commits
@@ -46,6 +47,18 @@
             ];
         }
     }];
+    
+    FLEXManager *flex = FLEXManager.sharedManager;
+    
+    // Register 't' for testing: quickly present an object explorer for debugging
+    [flex registerSimulatorShortcutWithKey:@"t" modifiers:0 action:^{
+        [flex showExplorer];
+        [flex presentTool:^UINavigationController *{
+            return [FLEXNavigationController withRootViewController:[FLEXObjectExplorerFactory
+                explorerViewControllerForObject:Person.bob
+            ]];
+        } completion:nil];
+    } description:@"Present an object explorer for debugging"];
 }
 
 - (void)viewWillAppear:(BOOL)animated {

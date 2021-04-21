@@ -3,7 +3,7 @@
 //  Flipboard
 //
 //  Created by Ryan Olson on 2/8/15.
-//  Copyright (c) 2020 Flipboard. All rights reserved.
+//  Copyright (c) 2020 FLEX Team. All rights reserved.
 //
 
 #import "FLEXColor.h"
@@ -49,15 +49,15 @@
     
     [self addToolbarItems:@[
         [UIBarButtonItem
-            itemWithImage:FLEXResources.gearIcon
+            flex_itemWithImage:FLEXResources.gearIcon
             target:self
             action:@selector(settingsButtonTapped:)
         ],
         [[UIBarButtonItem
-          systemItem:UIBarButtonSystemItemTrash
+          flex_systemItem:UIBarButtonSystemItemTrash
           target:self
           action:@selector(trashButtonTapped:)
-        ] withTintColor:UIColor.redColor]
+        ] flex_withTintColor:UIColor.redColor]
     ]];
 
     [self.tableView
@@ -406,22 +406,22 @@
                     UIPasteboard.generalPasteboard.string = request.URL.absoluteString ?: @"";
                 }
             ];
-            UIAction *blacklist = [UIAction
-                actionWithTitle:[NSString stringWithFormat:@"Blacklist '%@'", request.URL.host]
+            UIAction *denylist = [UIAction
+                actionWithTitle:[NSString stringWithFormat:@"Exclude '%@'", request.URL.host]
                 image:nil
                 identifier:nil
                 handler:^(__kindof UIAction *action) {
-                    NSMutableArray *blacklist =  FLEXNetworkRecorder.defaultRecorder.hostBlacklist;
-                    [blacklist addObject:request.URL.host];
-                    [FLEXNetworkRecorder.defaultRecorder clearBlacklistedTransactions];
-                    [FLEXNetworkRecorder.defaultRecorder synchronizeBlacklist];
+                    NSMutableArray *denylist =  FLEXNetworkRecorder.defaultRecorder.hostDenylist;
+                    [denylist addObject:request.URL.host];
+                    [FLEXNetworkRecorder.defaultRecorder clearExcludedTransactions];
+                    [FLEXNetworkRecorder.defaultRecorder synchronizeDenylist];
                     [self tryUpdateTransactions];
                 }
             ];
             return [UIMenu
                 menuWithTitle:@"" image:nil identifier:nil
                 options:UIMenuOptionsDisplayInline
-                children:@[copy, blacklist]
+                children:@[copy, denylist]
             ];
         }
     ];

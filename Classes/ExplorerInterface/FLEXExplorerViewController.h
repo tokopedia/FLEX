@@ -3,7 +3,7 @@
 //  Flipboard
 //
 //  Created by Ryan Olson on 4/4/14.
-//  Copyright (c) 2020 Flipboard. All rights reserved.
+//  Copyright (c) 2020 FLEX Team. All rights reserved.
 //
 
 #import "FLEXExplorerToolbar.h"
@@ -25,7 +25,8 @@
 ///
 /// If a tool is already presented, this method simply dismisses it and calls the completion block.
 /// If no tool is presented, @code future() @endcode is presented and the completion block is called.
-- (void)toggleToolWithViewControllerProvider:(UINavigationController *(^)(void))future completion:(void(^)(void))completion;
+- (void)toggleToolWithViewControllerProvider:(UINavigationController *(^)(void))future
+                                  completion:(void (^)(void))completion;
 
 // Keyboard shortcut helpers
 
