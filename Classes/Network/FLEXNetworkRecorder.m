@@ -157,7 +157,7 @@ NSString *const kFLEXNetworkRecorderResponseCacheLimitDefaultsKey = @"com.flex.r
 
 - (NSString *)getModifiedGqlUrlTitleWithRequest:(NSURLRequest *)request {
     NSURL *url = request.URL;
-    if([url.absoluteString containsString:@"gql.tokopedia.com"] && request.HTTPBody != NULL) {
+    if(([url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-gcp-staging.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"]) && request.HTTPBody != NULL) {
         NSError* error = nil;
         id dict = [NSJSONSerialization JSONObjectWithData:request.HTTPBody options:0 error:&error];
         if(dict != NULL && [dict objectForKey:@"query"] != NULL) {
