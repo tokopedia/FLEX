@@ -142,6 +142,7 @@ NSString *const kFLEXNetworkRecorderResponseCacheLimitDefaultsKey = @"com.flex.r
 
     dispatch_async(self.queue, ^{
         FLEXNetworkTransaction *transaction = [FLEXNetworkTransaction new];
+        transaction.urlTitle = [self getModifiedGqlUrlTitleWithRequest:request];
         transaction.requestID = requestID;
         transaction.request = request;
         transaction.startTime = startDate;
@@ -152,6 +153,30 @@ NSString *const kFLEXNetworkRecorderResponseCacheLimitDefaultsKey = @"com.flex.r
 
         [self postNewTransactionNotificationWithTransaction:transaction];
     });
+}
+
+- (NSString *)getModifiedGqlUrlTitleWithRequest:(NSURLRequest *)request {
+    NSURL *url = request.URL;
+    if([url.absoluteString containsString:@"gql.tokopedia.com"] && request.HTTPBody != NULL) {
+        NSError* error = nil;
+        id dict = [NSJSONSerialization JSONObjectWithData:request.HTTPBody options:0 error:&error];
+        if(dict != NULL && [dict objectForKey:@"query"] != NULL) {
+            NSString* query = [[[dict objectForKey:@"query"] componentsSeparatedByString:@"\n"] objectAtIndex:0];
+            return query;
+        } else {
+            return @"/";
+        }
+    } else {
+        NSString *name = [url lastPathComponent];
+        if (name.length == 0) {
+            name = @"/";
+        }
+        NSString *query = [url query];
+        if (query) {
+            name = [name stringByAppendingFormat:@"?%@", query];
+        }
+        return name;
+    }
 }
 
 - (void)recordResponseReceivedWithRequestID:(NSString *)requestID response:(NSURLResponse *)response {

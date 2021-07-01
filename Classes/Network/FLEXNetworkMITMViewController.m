@@ -443,7 +443,7 @@
     } else {
         [self onBackgroundQueue:^NSArray *{
             return [self.networkTransactions flex_filtered:^BOOL(FLEXNetworkTransaction *entry, NSUInteger idx) {
-                return [entry.request.URL.absoluteString localizedCaseInsensitiveContainsString:searchString];
+                return [entry.urlTitle localizedCaseInsensitiveContainsString:searchString];
             }];
         } thenOnMainQueue:^(NSArray *filteredNetworkTransactions) {
             if ([self.searchText isEqual:searchString]) {

@@ -21,6 +21,7 @@ typedef NS_ENUM(NSInteger, FLEXNetworkTransactionState) {
 
 @property (nonatomic, copy) NSString *requestID;
 
+@property (nonatomic) NSString *urlTitle; // To provide GQL query
 @property (nonatomic) NSURLRequest *request;
 @property (nonatomic) NSURLResponse *response;
 @property (nonatomic, copy) NSString *requestMechanism;
