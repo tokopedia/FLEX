@@ -30,6 +30,7 @@
 @property (nonatomic) BOOL rowInsertInProgress;
 @property (nonatomic) BOOL isPresentingSearch;
 @property (nonatomic) BOOL pendingReload;
+@property (nonatomic, setter = setShouldShowGQLRequestsOnly:) BOOL shouldShowOnlyGQLRequests;
 
 @end
 
@@ -46,6 +47,7 @@
 
     self.showsSearchBar = YES;
     self.showSearchBarInitially = NO;
+    self.shouldShowOnlyGQLRequests = YES;
     
     [self addToolbarItems:@[
         [UIBarButtonItem
@@ -57,7 +59,13 @@
           flex_systemItem:UIBarButtonSystemItemTrash
           target:self
           action:@selector(trashButtonTapped:)
-        ] flex_withTintColor:UIColor.redColor]
+        ] flex_withTintColor:UIColor.redColor],
+        [UIBarButtonItem
+            flex_itemWithTitle_CustomTint:(NSString*)@"GQL"
+            tint: UIColor.redColor
+            target:self
+            action:@selector(filterButtonTapped:)
+        ]
     ]];
 
     [self.tableView
@@ -133,6 +141,19 @@
     } showFrom:self source:sender];
 }
 
+- (void)filterButtonTapped:(UIBarButtonItem *)sender {
+    self.shouldShowOnlyGQLRequests = !self.shouldShowOnlyGQLRequests;
+    [self updateTransactions];
+    [self.tableView reloadData];
+}
+
+- (void)setShouldShowGQLRequestsOnly:(BOOL*) newStatus {
+    if (_shouldShowOnlyGQLRequests != newStatus) {
+        _shouldShowOnlyGQLRequests = newStatus;
+        self.toolbarItems[0].tintColor = newStatus ? UIColor.redColor : UIColor.lightGrayColor;
+    }
+}
+
 - (void)settingsViewControllerDoneTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -140,7 +161,16 @@
 #pragma mark Transactions
 
 - (void)updateTransactions {
-    self.networkTransactions = [FLEXNetworkRecorder.defaultRecorder networkTransactions];
+    if (self.shouldShowOnlyGQLRequests) {
+        self.networkTransactions = [[FLEXNetworkRecorder.defaultRecorder networkTransactions]  filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+            FLEXNetworkTransaction *transaction = (FLEXNetworkTransaction*)object;
+            NSURLRequest *request = ((NSURLRequest *)[transaction request]);
+            NSURL *url = [request URL];
+            return [url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"];
+        }]];
+    } else {
+        self.networkTransactions = [FLEXNetworkRecorder.defaultRecorder networkTransactions];
+    }
 }
 
 - (void)setNetworkTransactions:(NSArray<FLEXNetworkTransaction *> *)networkTransactions {
