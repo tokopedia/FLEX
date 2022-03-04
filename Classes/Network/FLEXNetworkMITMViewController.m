@@ -166,7 +166,7 @@
             FLEXNetworkTransaction *transaction = (FLEXNetworkTransaction*)object;
             NSURLRequest *request = ((NSURLRequest *)[transaction request]);
             NSURL *url = [request URL];
-            return [url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"];
+            return [url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"] || [url.host isEqualToString:@"gql-gcp-staging.tokopedia.com"];
         }]];
     } else {
         self.networkTransactions = [FLEXNetworkRecorder.defaultRecorder networkTransactions];
