@@ -47,7 +47,7 @@
 
     self.showsSearchBar = YES;
     self.showSearchBarInitially = NO;
-    self.shouldShowOnlyGQLRequests = YES;
+    self.shouldShowOnlyGQLRequests = NO;
     
     [self addToolbarItems:@[
         [UIBarButtonItem
