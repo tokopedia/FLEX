@@ -62,7 +62,7 @@
         ] flex_withTintColor:UIColor.redColor],
         [UIBarButtonItem
             flex_itemWithTitle_CustomTint:(NSString*)@"GQL"
-            tint: UIColor.redColor
+            tint: UIColor.lightGrayColor
             target:self
             action:@selector(filterButtonTapped:)
         ]
