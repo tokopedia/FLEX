@@ -25,6 +25,7 @@
 
 + (instancetype)flex_itemWithTitle:(NSString *)title target:(id)target action:(SEL)action;
 + (instancetype)flex_doneStyleitemWithTitle:(NSString *)title target:(id)target action:(SEL)action;
++ (instancetype)flex_itemWithTitle_CustomTint:(NSString *)title tint:(UIColor *)tint target:(id)target action:(SEL)action;
 
 + (instancetype)flex_itemWithImage:(UIImage *)image target:(id)target action:(SEL)action;
 

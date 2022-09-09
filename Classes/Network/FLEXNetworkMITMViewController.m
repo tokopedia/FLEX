@@ -36,6 +36,7 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
 
 @property (nonatomic) BOOL updateInProgress;
 @property (nonatomic) BOOL pendingReload;
+@property (nonatomic, setter = setShouldShowGQLRequestsOnly:) BOOL shouldShowOnlyGQLRequests;
 
 @property (nonatomic) FLEXNetworkObserverMode mode;
 
@@ -60,6 +61,7 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
     self.showsSearchBar = YES;
     self.pinSearchBar = YES;
     self.showSearchBarInitially = NO;
+
     NSMutableArray *scopeTitles = [NSMutableArray arrayWithObject:@"REST"];
     
     _HTTPDataSource = [FLEXMITMDataSource dataSourceWithProvider:^NSArray * {
@@ -79,6 +81,8 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
             return FLEXNetworkRecorder.defaultRecorder.websocketTransactions;
         }];
     }
+
+    self.shouldShowOnlyGQLRequests = NO;
     
     // Scopes will only be shown if we have either firebase or websockets available
     self.searchController.searchBar.showsScopeBar = scopeTitles.count > 1;
@@ -95,7 +99,13 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
           flex_systemItem:UIBarButtonSystemItemTrash
           target:self
           action:@selector(trashButtonTapped:)
-        ] flex_withTintColor:UIColor.redColor]
+        ] flex_withTintColor:UIColor.redColor],
+        [UIBarButtonItem
+            flex_itemWithTitle_CustomTint:(NSString*)@"GQL"
+            tint: UIColor.lightGrayColor
+            target:self
+            action:@selector(filterButtonTapped:)
+        ]
     ]];
 
     [self.tableView
@@ -182,6 +192,19 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
     } showFrom:self source:sender];
 }
 
+- (void)filterButtonTapped:(UIBarButtonItem *)sender {
+    self.shouldShowOnlyGQLRequests = !self.shouldShowOnlyGQLRequests;
+    [self updateTransactions];
+    [self.tableView reloadData];
+}
+
+- (void)setShouldShowGQLRequestsOnly:(BOOL*) newStatus {
+    if (_shouldShowOnlyGQLRequests != newStatus) {
+        _shouldShowOnlyGQLRequests = newStatus;
+        self.toolbarItems[0].tintColor = newStatus ? UIColor.redColor : UIColor.lightGrayColor;
+    }
+}
+
 - (void)settingsViewControllerDoneTapped:(id)sender {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
@@ -202,6 +225,19 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
             if (kFirebaseAvailable) {
                 return FLEXNetworkObserverModeREST;
             }
+
+- (void)updateTransactions {
+    if (self.shouldShowOnlyGQLRequests) {
+        self.networkTransactions = [[FLEXNetworkRecorder.defaultRecorder networkTransactions]  filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
+            FLEXNetworkTransaction *transaction = (FLEXNetworkTransaction*)object;
+            NSURLRequest *request = ((NSURLRequest *)[transaction request]);
+            NSURL *url = [request URL];
+            return [url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"] || [url.host isEqualToString:@"gql-gcp-staging.tokopedia.com"];
+        }]];
+    } else {
+        self.networkTransactions = [FLEXNetworkRecorder.defaultRecorder networkTransactions];
+    }
+}
 
             return FLEXNetworkObserverModeWebsockets;
         case FLEXNetworkObserverModeWebsockets:
