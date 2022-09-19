@@ -36,7 +36,7 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
 
 @property (nonatomic) BOOL updateInProgress;
 @property (nonatomic) BOOL pendingReload;
-@property (nonatomic, setter = setShouldShowGQLRequestsOnly:) BOOL shouldShowOnlyGQLRequests;
+@property (nonatomic) BOOL shouldShowOnlyGQLRequests;
 
 @property (nonatomic) FLEXNetworkObserverMode mode;
 
@@ -61,7 +61,6 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
     self.showsSearchBar = YES;
     self.pinSearchBar = YES;
     self.showSearchBarInitially = NO;
-
     NSMutableArray *scopeTitles = [NSMutableArray arrayWithObject:@"REST"];
     
     _HTTPDataSource = [FLEXMITMDataSource dataSourceWithProvider:^NSArray * {
@@ -195,10 +194,9 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
 - (void)filterButtonTapped:(UIBarButtonItem *)sender {
     self.shouldShowOnlyGQLRequests = !self.shouldShowOnlyGQLRequests;
     [self updateTransactions];
-    [self.tableView reloadData];
 }
 
-- (void)setShouldShowGQLRequestsOnly:(BOOL*) newStatus {
+- (void)setShouldShowOnlyGQLRequests:(BOOL) newStatus {
     if (_shouldShowOnlyGQLRequests != newStatus) {
         _shouldShowOnlyGQLRequests = newStatus;
         self.toolbarItems[0].tintColor = newStatus ? UIColor.redColor : UIColor.lightGrayColor;
@@ -225,8 +223,23 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
             if (kFirebaseAvailable) {
                 return FLEXNetworkObserverModeREST;
             }
+            return FLEXNetworkObserverModeWebsockets;
+        case FLEXNetworkObserverModeWebsockets:
+            return FLEXNetworkObserverModeWebsockets;
+    }
+}
 
 - (void)updateTransactions {
+    
+    id callback = ^(FLEXMITMDataSource *dataSource) {
+        if (self.dataSource == dataSource) {
+            [self.tableView reloadData];
+        }
+    };
+    
+    [self.HTTPDataSource filter:@"gql.tokopedia.com" completion:callback];
+ 
+    /*
     if (self.shouldShowOnlyGQLRequests) {
         self.networkTransactions = [[FLEXNetworkRecorder.defaultRecorder networkTransactions]  filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
             FLEXNetworkTransaction *transaction = (FLEXNetworkTransaction*)object;
@@ -235,14 +248,9 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
             return [url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"] || [url.host isEqualToString:@"gql-gcp-staging.tokopedia.com"];
         }]];
     } else {
-        self.networkTransactions = [FLEXNetworkRecorder.defaultRecorder networkTransactions];
+        [FLEXNetworkRecorder.defaultRecorder ];
     }
-}
-
-            return FLEXNetworkObserverModeWebsockets;
-        case FLEXNetworkObserverModeWebsockets:
-            return FLEXNetworkObserverModeWebsockets;
-    }
+    */
 }
 
 - (void)setMode:(FLEXNetworkObserverMode)mode {
