@@ -231,26 +231,20 @@ typedef NS_ENUM(NSInteger, FLEXNetworkObserverMode) {
 
 - (void)updateTransactions {
     
+    NSString *filterText;
+    if (_shouldShowOnlyGQLRequests == YES) {
+        filterText = @"graphql";
+    }else {
+        filterText = @"";
+    }
+    
     id callback = ^(FLEXMITMDataSource *dataSource) {
         if (self.dataSource == dataSource) {
             [self.tableView reloadData];
         }
     };
     
-    [self.HTTPDataSource filter:@"gql.tokopedia.com" completion:callback];
- 
-    /*
-    if (self.shouldShowOnlyGQLRequests) {
-        self.networkTransactions = [[FLEXNetworkRecorder.defaultRecorder networkTransactions]  filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id object, NSDictionary *bindings) {
-            FLEXNetworkTransaction *transaction = (FLEXNetworkTransaction*)object;
-            NSURLRequest *request = ((NSURLRequest *)[transaction request]);
-            NSURL *url = [request URL];
-            return [url.host isEqualToString:@"gql.tokopedia.com"] || [url.host isEqualToString:@"gql-staging.tokopedia.com"] || [url.host isEqualToString:@"gql-gcp-staging.tokopedia.com"];
-        }]];
-    } else {
-        [FLEXNetworkRecorder.defaultRecorder ];
-    }
-    */
+    [self.HTTPDataSource filter:filterText completion:callback];
 }
 
 - (void)setMode:(FLEXNetworkObserverMode)mode {
