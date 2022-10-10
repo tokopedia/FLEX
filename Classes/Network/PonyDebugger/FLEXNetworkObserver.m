@@ -498,15 +498,8 @@ static FIRDocumentReference * _logos_method$_ungrouped$FIRCollectionReference$ad
                 for (unsigned int methodIndex = 0; methodIndex < methodCount; methodIndex++) {
                     for (int selectorIndex = 0; selectorIndex < numSelectors; ++selectorIndex) {
                         if (method_getName(methods[methodIndex]) == selectors[selectorIndex]) {
-                            
-                            
-                            
-                            if ([class isKindOfClass:[NRURLSessionTaskDelegateBase class]]) {
-//                                if([class conformsToProtocol:@protocol(NRURLSessionTaskDelegateBase)])
-//                                    id<NRURLSessionTaskDelegateBase> p = (id<NRURLSessionTaskDelegateBase>)class;
-//                                    [self injectIntoDelegateClass:p.realDelegate];
-//                                }
-                               
+                            NSString *clsName = [NSString stringWithUTF8String: class_getName(class)];
+                            if ([clsName isEqualToString:@"NRURLSessionTaskDelegateBase"]) {
                                 break;
                             }else {
                                 [self injectIntoDelegateClass:class];
