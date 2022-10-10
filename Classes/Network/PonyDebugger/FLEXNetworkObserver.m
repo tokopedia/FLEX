@@ -28,8 +28,6 @@
 #import <dispatch/queue.h>
 #include <dlfcn.h>
 
-@import NewRelic;
-
 NSString *const kFLEXNetworkObserverEnabledStateChangedNotification = @"kFLEXNetworkObserverEnabledStateChangedNotification";
 
 typedef void (^NSURLSessionAsyncCompletion)(id fileURLOrData, NSURLResponse *response, NSError *error);
