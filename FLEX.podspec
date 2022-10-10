@@ -56,5 +56,4 @@ Pod::Spec.new do |spec|
                                "Classes/ObjectExplorers/Sections/Shortcuts/FLEXShortcutsSection.h",
                                "Classes/GlobalStateExplorers/Globals/FLEXGlobalsEntry.h"
                               ]
-  spec.dependency "NewRelicAgent", "7.3.6"
 end
