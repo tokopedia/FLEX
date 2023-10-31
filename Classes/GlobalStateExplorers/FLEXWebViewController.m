@@ -218,7 +218,7 @@
         [self.webView evaluateJavaScript:javascript completionHandler:^(id result, NSError *error) {
             if (!error) {
                 // Update the search info label with the correct number of results found
-                self.searchInfoLabel.text = [NSString stringWithFormat:@"%ld results found", (long)[result integerValue]];
+                self.searchInfoLabel.text = [NSString stringWithFormat:@"%ld result(s) found", (long)[result integerValue]];
             } else {
                 NSLog(@"JavaScript evaluation error: %@", error);
             }
