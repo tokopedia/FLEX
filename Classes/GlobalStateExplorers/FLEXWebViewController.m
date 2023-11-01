@@ -10,10 +10,14 @@
 #import "FLEXUtility.h"
 #import <WebKit/WebKit.h>
 
-@interface FLEXWebViewController () <WKNavigationDelegate>
+@interface FLEXWebViewController () <WKNavigationDelegate, UISearchBarDelegate>
 
 @property (nonatomic) WKWebView *webView;
 @property (nonatomic) NSString *originalText;
+@property (nonatomic) UISearchBar *searchBar;
+@property (nonatomic) UIBarButtonItem *searchBarButton;
+@property (nonatomic) NSString *searchText;
+@property (nonatomic) UILabel *searchInfoLabel;
 
 @end
 
@@ -83,6 +87,12 @@
             initWithTitle:@"Copy" style:UIBarButtonItemStylePlain target:self action:@selector(copyButtonTapped:)
         ];
     }
+    // Create the search bar button and add it to the navigation item
+    self.searchBarButton = [[UIBarButtonItem alloc]
+                            initWithBarButtonSystemItem:UIBarButtonSystemItemSearch
+                            target:self action:@selector(searchButtonTapped:)
+    ];
+    self.navigationItem.rightBarButtonItems = @[self.searchBarButton, self.navigationItem.rightBarButtonItem];
 }
 
 - (void)copyButtonTapped:(id)sender {
@@ -138,6 +148,118 @@
     });
 
     return pathExtensions;
+}
+
+- (void)loadWebViewContent {
+    if (self.originalText.length > 0) {
+        NSString *html = [NSString stringWithFormat:@"<head><style>:root{ color-scheme: light dark; }</style>"
+                          "<meta name='viewport' content='initial-scale=1.0'></head><body><pre>%@</pre></body>", self.originalText];
+        [self.webView loadHTMLString:html baseURL:nil];
+    }
+}
+
+#pragma mark - Search Bar
+- (void)searchButtonTapped:(id)sender {
+    // Remove the old highlighted results if any
+    if (self.searchText.length > 0) {
+        self.searchText = nil;
+        [self loadWebViewContent]; // Reset the WKWebView content to the original state
+    }
+    
+    // Create and display the search bar
+    self.searchBar = [[UISearchBar alloc] init];
+    self.searchBar.delegate = self;
+    self.searchBar.showsCancelButton = YES;
+    self.searchBar.placeholder = @"Search";
+    self.searchBar.autocapitalizationType = UITextAutocapitalizationTypeNone;
+    self.navigationItem.titleView = self.searchBar;
+    
+    // Create and display the search info label if not added already
+    if (![self.searchInfoLabel isDescendantOfView:self.view]) {
+        self.searchInfoLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, self.view.bounds.size.height - 44, self.view.bounds.size.width, 44)];
+        self.searchInfoLabel.backgroundColor = [UIColor lightGrayColor];
+        self.searchInfoLabel.textColor = [UIColor blackColor];
+        self.searchInfoLabel.textAlignment = NSTextAlignmentCenter;
+        [self.view addSubview:self.searchInfoLabel];
+    }
+    self.searchInfoLabel.text = @"";
+    [self.searchBar becomeFirstResponder];
+}
+
+- (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar {
+    [searchBar resignFirstResponder];
+    self.searchText = searchBar.text;
+    [self resetHighlightedText];
+    [self searchAndHighlightText];
+}
+
+- (void)searchAndHighlightText {
+    if (self.searchText.length > 0) {
+        NSString *searchText = self.searchText;
+        NSString *javascript = [NSString stringWithFormat:@""
+                                "function highlightText(text) {"
+                                " var elements = document.querySelectorAll(':not([hidden]) *');"
+                                " var count = 0;"
+                                " for (var i = 0; i < elements.length; i++) {"
+                                "  var innerHTML = elements[i].innerHTML;"
+                                "  var searchRegEx = new RegExp(text, 'gi');"
+                                "  var matches = innerHTML.match(searchRegEx);"
+                                "  if (matches) {"
+                                "    innerHTML = innerHTML.replace(searchRegEx, '<span style=\"background-color: yellow;\">' + text + '</span>');"
+                                "    count += matches.length;"
+                                "  }"
+                                "  elements[i].innerHTML = innerHTML;"
+                                " }"
+                                " return count / 2;" // Divide by 2 to account for two separate search texts
+                                "};"
+                                "var result = highlightText('%@');"
+                                "result;", searchText];
+        
+        [self.webView evaluateJavaScript:javascript completionHandler:^(id result, NSError *error) {
+            if (!error) {
+                // Update the search info label with the correct number of results found
+                self.searchInfoLabel.text = [NSString stringWithFormat:@"%ld result(s) found", (long)[result integerValue]];
+            } else {
+                NSLog(@"JavaScript evaluation error: %@", error);
+            }
+        }];
+    }
+}
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
+    [searchBar resignFirstResponder];
+    self.searchText = nil;
+    self.navigationItem.titleView = nil; // Remove the search bar from the navigation item
+    [self.searchInfoLabel removeFromSuperview]; // Remove the search info label
+    [self loadWebViewContent]; // Reset the WKWebView content to the original state
+}
+
+- (void)resetHighlightedText {
+    NSString *javascript = @""
+    "function resetHighlight() {"
+    "  var elements = document.getElementsByTagName('span');"
+    "  for (var i = 0; i < elements.length; i++) {"
+    "    if (elements[i].style.backgroundColor === 'yellow') {"
+    "      elements[i].style.backgroundColor = 'transparent';"
+    "    }"
+    "  }"
+    "};"
+    "resetHighlight();";
+    
+    [self.webView evaluateJavaScript:javascript completionHandler:^(id result, NSError *error) {
+        if (!error) {
+            self.searchInfoLabel.text = @"";
+        } else {
+            NSLog(@"JavaScript evaluation error: %@", error);
+        }
+    }];
+}
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    self.searchText = searchText;
+    if (searchText.length == 0) {
+        [self resetHighlightedText];
+    }
 }
 
 @end
