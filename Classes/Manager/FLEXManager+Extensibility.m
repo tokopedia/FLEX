@@ -85,9 +85,41 @@
 
 #pragma mark - Simulator Shortcuts
 
-- (void)registerSimulatorShortcutWithKey:(NSString *)key modifiers:(UIKeyModifierFlags)modifiers action:(dispatch_block_t)action description:(NSString *)description {
+- (void)registerSimulatorShortcutWithKey:(NSString *)key
+                               modifiers:(UIKeyModifierFlags)modifiers
+                  viewControllerProvider:(UIViewController * (^)(void))viewControllerProvider
+                             description:(NSString *)description {
 #if TARGET_OS_SIMULATOR
-    [FLEXKeyboardShortcutManager.sharedManager registerSimulatorShortcutWithKey:key modifiers:modifiers action:action description:description allowOverride:YES];
+    [self registerSimulatorShortcutWithKey:key modifiers:modifiers action:^{
+        // Run your setup code first
+        [self showExplorerIfNeeded];
+        
+        // Then get and present the view controller
+        UIViewController *viewController = viewControllerProvider();
+        if (viewController) {
+            UINavigationController *topViewController = (id)self.topViewController;
+            if ([topViewController isKindOfClass:[FLEXNavigationController class]]) {
+                // Check if we're already presenting a view controller of the same class
+                if ([topViewController.topViewController isKindOfClass:[viewController class]]) {
+                    if (topViewController.viewControllers.count == 1) {
+                        // Dismiss since we are already presenting it
+                        [topViewController.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+                    } else {
+                        // Pop since we are viewing it but it's not the only thing on the stack
+                        [topViewController popViewControllerAnimated:YES];
+                    }
+                } else {
+                    // Push it on the existing navigation stack
+                    [topViewController pushViewController:viewController animated:YES];
+                }
+            } else {
+                // Present it in an entirely new navigation controller
+                [self.explorerViewController presentViewController:
+                    [FLEXNavigationController withRootViewController:viewController]
+                animated:YES completion:nil];
+            }
+        }
+    } description:description];
 #endif
 }
 
@@ -107,6 +139,15 @@
 
 
 #pragma mark - Shortcuts Defaults
+
+- (void)registerSimulatorShortcutWithKey:(NSString *)key
+                               modifiers:(UIKeyModifierFlags)modifiers
+                                  action:(dispatch_block_t)action
+                             description:(NSString *)description {
+#if TARGET_OS_SIMULATOR
+    [FLEXKeyboardShortcutManager.sharedManager registerSimulatorShortcutWithKey:key modifiers:modifiers action:action description:description allowOverride:YES];
+#endif
+}
 
 - (void)registerDefaultSimulatorShortcutWithKey:(NSString *)key modifiers:(UIKeyModifierFlags)modifiers action:(dispatch_block_t)action description:(NSString *)description {
 #if TARGET_OS_SIMULATOR
@@ -181,6 +222,11 @@
     [self registerDefaultSimulatorShortcutWithKey:@"o" modifiers:UIKeyModifierCommand|UIKeyModifierShift action:^{
         [self toggleTopViewControllerOfClass:[FLEXFileBrowserController class]];
     } description:@"Toggle file browser menu"];
+
+    [self registerDefaultSimulatorShortcutWithKey:@"t" modifiers:0 action:^{
+        // This is intentionally left empty as a placeholder
+        // Users should register their own implementation using registerSimulatorShortcutWithKey:modifiers:viewControllerProvider:description:
+    } description:@"Toggle custom view controller (override this)"];
 }
 
 + (void)load {

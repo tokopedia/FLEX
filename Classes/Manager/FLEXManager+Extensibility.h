@@ -72,10 +72,20 @@ NS_ASSUME_NONNULL_BEGIN
 /// @param action The block to run on the main thread when the key & modifier combination is recognized.
 /// @param description Shown the the keyboard shortcut help menu, which is accessed via the '?' key.
 /// @note The action block will be retained for the duration of the application. You may want to use weak references.
-/// @note FLEX registers several default keyboard shortcuts. Use the '?' key to see a list of shortcuts.
 - (void)registerSimulatorShortcutWithKey:(NSString *)key
                                modifiers:(UIKeyModifierFlags)modifiers
                                   action:(dispatch_block_t)action
+                             description:(NSString *)description;
+
+/// Adds a shortcut with a setup block that runs before presenting a view controller
+/// @param key A single character string matching a key on the keyboard
+/// @param modifiers Modifier keys such as shift, command, or alt/option
+/// @param viewControllerProvider A block that return desiered view controller to be presented
+/// @param description Shown the the keyboard shortcut help menu, which is accessed via the '?' key.
+/// @note The setupBlock will be retained for the duration of the application. You may want to use weak references.
+- (void)registerSimulatorShortcutWithKey:(NSString *)key
+                               modifiers:(UIKeyModifierFlags)modifiers
+                  viewControllerProvider:(UIViewController * (^)(void))viewControllerProvider
                              description:(NSString *)description;
 
 @end
